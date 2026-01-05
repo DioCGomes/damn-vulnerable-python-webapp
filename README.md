@@ -17,16 +17,46 @@ A deliberately insecure web application built with Flask, designed for learning 
 
 ## Quick Start
 
-### Prerequisites
+### Option 1: Docker / nerdctl (Recommended)
 
-- Python 3.8+
-- pip
+#### Prerequisites
 
-### Installation
+- Docker or Rancher Desktop (with nerdctl)
+
+#### Run with nerdctl (Rancher Desktop)
+
+```bash
+# Build and run
+make nerdctl-run
+
+# View logs
+make nerdctl-logs
+
+# Stop the container
+make nerdctl-stop
+```
+
+#### Run with Docker
+
+```bash
+# Build and run
+make docker-run
+
+# View logs
+make docker-logs
+
+# Stop the container
+make docker-stop
+```
+
+### Option 2: Local Python
+
+
+#### Installation
 
 ```bash
 # Clone or navigate to the project
-cd tmp-py
+cd dvpwa
 
 # Create a virtual environment (recommended)
 python -m venv venv
@@ -211,10 +241,12 @@ Passwords are stored in the database without hashing.
 ## Project Structure
 
 ```text
-tmp-py/
+dvpwa/
 ├── app.py                 # Main Flask application
 ├── requirements.txt       # Python dependencies
 ├── Makefile              # Build automation
+├── Dockerfile            # Container image definition
+├── .dockerignore         # Files to exclude from image
 ├── vulnerable.db         # SQLite database (created on first run)
 ├── uploads/              # File upload directory
 │   └── readme.txt        # Sample file
@@ -238,6 +270,8 @@ tmp-py/
 
 ## Makefile Commands
 
+### Local Development
+
 | Command        | Description                              |
 |----------------|------------------------------------------|
 | `make help`    | Show all available commands              |
@@ -247,6 +281,28 @@ tmp-py/
 | `make reset`   | Reset database and uploads               |
 | `make clean`   | Remove venv and generated files          |
 | `make test`    | Run vulnerability tests                  |
+
+### Docker
+
+| Command             | Description                    |
+|---------------------|--------------------------------|
+| `make docker-build` | Build Docker image             |
+| `make docker-run`   | Run container (auto-builds)    |
+| `make docker-stop`  | Stop and remove container      |
+| `make docker-logs`  | View container logs            |
+| `make docker-shell` | Open shell in container        |
+| `make docker-clean` | Remove container and image     |
+
+### nerdctl (Rancher Desktop)
+
+| Command              | Description                    |
+|----------------------|--------------------------------|
+| `make nerdctl-build` | Build image with nerdctl       |
+| `make nerdctl-run`   | Run container (auto-builds)    |
+| `make nerdctl-stop`  | Stop and remove container      |
+| `make nerdctl-logs`  | View container logs            |
+| `make nerdctl-shell` | Open shell in container        |
+| `make nerdctl-clean` | Remove container and image     |
 
 ## Security Learning Resources
 

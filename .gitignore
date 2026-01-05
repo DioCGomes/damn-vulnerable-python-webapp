@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# SQLite database (generated at runtime)
+vulnerable.db
+
+# Uploads directory contents (sample files created at runtime)
+uploads/

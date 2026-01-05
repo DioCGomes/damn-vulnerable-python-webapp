@@ -1,9 +1,16 @@
-.PHONY: help install venv run dev clean reset db shell freeze
+.PHONY: help install venv run dev clean reset db shell freeze \
+        docker-build docker-run docker-stop docker-clean docker-logs docker-shell \
+        nerdctl-build nerdctl-run nerdctl-stop nerdctl-clean nerdctl-logs nerdctl-shell
 
 # Default Python interpreter
 PYTHON := python3
 VENV := venv
 BIN := $(VENV)/bin
+
+# Docker/nerdctl settings
+IMAGE_NAME := dvpwa
+CONTAINER_NAME := dvpwa
+PORT := 5000
 
 # Colors for output
 RED := \033[0;31m
@@ -129,4 +136,84 @@ test: test-sqli test-xss test-api ## Run all vulnerability tests
 	@echo ""
 	@echo "$(YELLOW)Note: Some tests require logging in first.$(NC)"
 	@echo "$(YELLOW)Run 'make run' in another terminal before testing.$(NC)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# DOCKER TARGETS (for standard Docker)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+docker-build: ## Build Docker image
+	@echo "$(GREEN)Building Docker image...$(NC)"
+	docker build -t $(IMAGE_NAME) .
+	@echo "$(GREEN)Docker image '$(IMAGE_NAME)' built successfully!$(NC)"
+
+docker-run: ## Run container (builds if needed)
+	@echo ""
+	@echo "$(RED)⚠️  WARNING: This is an intentionally vulnerable application!$(NC)"
+	@echo "$(RED)⚠️  DO NOT expose to the internet or use in production!$(NC)"
+	@echo ""
+	@if [ -z "$$(docker images -q $(IMAGE_NAME) 2>/dev/null)" ]; then \
+		$(MAKE) docker-build; \
+	fi
+	@echo "$(GREEN)Starting DVPWA container on http://localhost:$(PORT)$(NC)"
+	docker run -d --name $(CONTAINER_NAME) -p $(PORT):5000 $(IMAGE_NAME)
+	@echo "$(GREEN)Container started! Access at http://localhost:$(PORT)$(NC)"
+	@echo "$(YELLOW)Use 'make docker-logs' to view logs$(NC)"
+	@echo "$(YELLOW)Use 'make docker-stop' to stop the container$(NC)"
+
+docker-stop: ## Stop and remove container
+	@echo "$(YELLOW)Stopping container...$(NC)"
+	-docker stop $(CONTAINER_NAME) 2>/dev/null
+	-docker rm $(CONTAINER_NAME) 2>/dev/null
+	@echo "$(GREEN)Container stopped and removed!$(NC)"
+
+docker-logs: ## View container logs
+	docker logs -f $(CONTAINER_NAME)
+
+docker-shell: ## Open shell in running container
+	docker exec -it $(CONTAINER_NAME) /bin/bash
+
+docker-clean: docker-stop ## Remove container and image
+	@echo "$(YELLOW)Removing Docker image...$(NC)"
+	-docker rmi $(IMAGE_NAME) 2>/dev/null
+	@echo "$(GREEN)Docker cleanup complete!$(NC)"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# NERDCTL TARGETS (for Rancher Desktop)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+nerdctl-build: ## Build image with nerdctl (Rancher Desktop)
+	@echo "$(GREEN)Building image with nerdctl...$(NC)"
+	nerdctl build -t $(IMAGE_NAME) .
+	@echo "$(GREEN)Image '$(IMAGE_NAME)' built successfully!$(NC)"
+
+nerdctl-run: ## Run container with nerdctl (builds if needed)
+	@echo ""
+	@echo "$(RED)⚠️  WARNING: This is an intentionally vulnerable application!$(NC)"
+	@echo "$(RED)⚠️  DO NOT expose to the internet or use in production!$(NC)"
+	@echo ""
+	@if [ -z "$$(nerdctl images -q $(IMAGE_NAME) 2>/dev/null)" ]; then \
+		$(MAKE) nerdctl-build; \
+	fi
+	@echo "$(GREEN)Starting DVPWA container on http://localhost:$(PORT)$(NC)"
+	nerdctl run -d --name $(CONTAINER_NAME) -p $(PORT):5000 $(IMAGE_NAME)
+	@echo "$(GREEN)Container started! Access at http://localhost:$(PORT)$(NC)"
+	@echo "$(YELLOW)Use 'make nerdctl-logs' to view logs$(NC)"
+	@echo "$(YELLOW)Use 'make nerdctl-stop' to stop the container$(NC)"
+
+nerdctl-stop: ## Stop and remove container (nerdctl)
+	@echo "$(YELLOW)Stopping container...$(NC)"
+	-nerdctl stop $(CONTAINER_NAME) 2>/dev/null
+	-nerdctl rm $(CONTAINER_NAME) 2>/dev/null
+	@echo "$(GREEN)Container stopped and removed!$(NC)"
+
+nerdctl-logs: ## View container logs (nerdctl)
+	nerdctl logs -f $(CONTAINER_NAME)
+
+nerdctl-shell: ## Open shell in running container (nerdctl)
+	nerdctl exec -it $(CONTAINER_NAME) /bin/bash
+
+nerdctl-clean: nerdctl-stop ## Remove container and image (nerdctl)
+	@echo "$(YELLOW)Removing image...$(NC)"
+	-nerdctl rmi $(IMAGE_NAME) 2>/dev/null
+	@echo "$(GREEN)Cleanup complete!$(NC)"
 

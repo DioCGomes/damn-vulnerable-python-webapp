@@ -1,0 +1,37 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Database (will be created at runtime)
+*.db
+
+# Documentation
+*.md
+LICENSE
+
+# Build artifacts
+*.egg-info
+dist/
+build/
+
+# Makefile (not needed in container)
+Makefile
+
