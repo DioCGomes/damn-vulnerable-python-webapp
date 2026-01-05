@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}DVPWA{% endblock %} | Damn Vulnerable Python Web App</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-card: #12121a;
+            --bg-hover: #1a1a25;
+            --accent-red: #ff3e3e;
+            --accent-red-dim: #ff3e3e40;
+            --accent-orange: #ff9500;
+            --accent-green: #00ff88;
+            --accent-blue: #00d4ff;
+            --accent-purple: #b44aff;
+            --text-primary: #f0f0f5;
+            --text-secondary: #8888aa;
+            --border: #2a2a3a;
+            --danger: #ff4444;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(ellipse at top left, rgba(255, 62, 62, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(180, 74, 255, 0.06) 0%, transparent 50%),
+                linear-gradient(180deg, var(--bg-dark) 0%, #0d0d14 100%);
+        }
+        
+        .warning-banner {
+            background: linear-gradient(90deg, var(--danger), #ff6b35);
+            color: white;
+            text-align: center;
+            padding: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(255, 68, 68, 0.3);
+        }
+        
+        .warning-banner::before {
+            content: "⚠️ ";
+        }
+        
+        .warning-banner::after {
+            content: " ⚠️";
+        }
+        
+        nav {
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+        }
+        
+        .nav-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+        
+        .logo {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-red);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .nav-links a:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+        
+        .nav-links a.danger {
+            color: var(--accent-red);
+        }
+        
+        .nav-links a.danger:hover {
+            background: var(--accent-red-dim);
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .user-badge {
+            background: var(--bg-hover);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+        }
+        
+        .user-badge span {
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+        
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        h1, h2, h3 {
+            font-weight: 700;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 1rem;
+        }
+        
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .card-icon.red { background: var(--accent-red-dim); }
+        .card-icon.orange { background: rgba(255, 149, 0, 0.2); }
+        .card-icon.green { background: rgba(0, 255, 136, 0.2); }
+        .card-icon.blue { background: rgba(0, 212, 255, 0.2); }
+        .card-icon.purple { background: rgba(180, 74, 255, 0.2); }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        textarea {
+            width: 100%;
+            padding: 14px 18px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-red);
+            box-shadow: 0 0 0 3px var(--accent-red-dim);
+        }
+        
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 62, 62, 0.4);
+        }
+        
+        .btn-secondary {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+        
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .flash-messages {
+            margin-bottom: 1.5rem;
+        }
+        
+        .flash {
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .flash.success {
+            background: rgba(0, 255, 136, 0.15);
+            border: 1px solid var(--accent-green);
+            color: var(--accent-green);
+        }
+        
+        .flash.danger {
+            background: rgba(255, 68, 68, 0.15);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+        }
+        
+        .error-box {
+            background: rgba(255, 68, 68, 0.15);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 16px 20px;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .vuln-tag {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .vuln-tag.sqli { background: rgba(255, 62, 62, 0.2); color: var(--accent-red); }
+        .vuln-tag.xss { background: rgba(255, 149, 0, 0.2); color: var(--accent-orange); }
+        .vuln-tag.cmd { background: rgba(180, 74, 255, 0.2); color: var(--accent-purple); }
+        .vuln-tag.idor { background: rgba(0, 212, 255, 0.2); color: var(--accent-blue); }
+        .vuln-tag.lfi { background: rgba(0, 255, 136, 0.2); color: var(--accent-green); }
+        
+        pre, code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        .code-block {
+            background: var(--bg-dark);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+        
+        .hint {
+            background: rgba(255, 149, 0, 0.1);
+            border-left: 4px solid var(--accent-orange);
+            padding: 1rem 1.25rem;
+            border-radius: 0 10px 10px 0;
+            margin: 1rem 0;
+            font-size: 0.9rem;
+        }
+        
+        .hint::before {
+            content: "💡 Hint: ";
+            font-weight: 600;
+            color: var(--accent-orange);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        th {
+            background: var(--bg-dark);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        tr:hover td {
+            background: var(--bg-hover);
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-content {
+                flex-direction: column;
+                height: auto;
+                padding: 1rem 0;
+                gap: 1rem;
+            }
+            
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="warning-banner">
+        INTENTIONALLY VULNERABLE APPLICATION - FOR EDUCATIONAL USE ONLY - DO NOT DEPLOY TO PRODUCTION
+    </div>
+    
+    <nav>
+        <div class="nav-content">
+            <a href="{{ url_for('index') }}" class="logo">
+                <div class="logo-icon">🔓</div>
+                DVPWA
+            </a>
+            
+            <ul class="nav-links">
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                {% if session.get('user_id') %}
+                <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('search') }}">Search</a></li>
+                <li><a href="{{ url_for('cmd') }}" class="danger">Ping Tool</a></li>
+                <li><a href="{{ url_for('file_view') }}" class="danger">File Viewer</a></li>
+                <li><a href="{{ url_for('admin') }}" class="danger">Admin</a></li>
+                {% endif %}
+            </ul>
+            
+            <div class="user-info">
+                {% if session.get('user_id') %}
+                <div class="user-badge">
+                    Logged in as <span>{{ session.get('username') }}</span>
+                </div>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+                {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-secondary">Login</a>
+                <a href="{{ url_for('register') }}" class="btn btn-primary">Register</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+    
+    <main>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-messages">
+            {% for category, message in messages %}
+            <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+    
+    <footer>
+        <p>DVPWA - Damn Vulnerable Python Web App | Created for Security Education</p>
+        <p style="margin-top: 0.5rem;">Learn. Hack. Secure.</p>
+    </footer>
+</body>
+</html>
+

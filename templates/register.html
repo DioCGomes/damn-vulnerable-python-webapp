@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 500px;">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon green">📝</div>
+            <div>
+                <h2>Register</h2>
+                <span class="vuln-tag sqli">SQL Injection</span>
+            </div>
+        </div>
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Choose a username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Choose a password" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                Create Account →
+            </button>
+        </form>
+        
+        <div class="hint" style="margin-top: 1.5rem;">
+            This form is vulnerable to SQL Injection. Try injecting SQL in any field.
+        </div>
+        
+        <p style="text-align: center; margin-top: 1.5rem; color: var(--text-secondary);">
+            Already have an account? <a href="{{ url_for('login') }}" style="color: var(--accent-blue);">Login here</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+

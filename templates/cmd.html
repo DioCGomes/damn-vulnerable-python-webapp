@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Ping Tool{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 700px;">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon purple">🖥️</div>
+            <div>
+                <h2>Network Ping Tool</h2>
+                <span class="vuln-tag cmd">Command Injection</span>
+            </div>
+        </div>
+        
+        <form method="GET">
+            <div class="form-group">
+                <label for="host">Host to Ping</label>
+                <input type="text" id="host" name="host" value="{{ host }}" placeholder="Enter hostname or IP address">
+            </div>
+            <button type="submit" class="btn btn-primary">Ping Host →</button>
+        </form>
+        
+        <div class="hint" style="margin-top: 1rem;">
+            Try: <code>127.0.0.1; cat /etc/passwd</code> or <code>127.0.0.1 && ls -la</code>
+        </div>
+    </div>
+    
+    {% if output %}
+    <div class="card">
+        <h3 style="margin-bottom: 1rem;">📤 Command Output</h3>
+        <div class="code-block">
+            <pre style="white-space: pre-wrap; word-break: break-all;">{{ output }}</pre>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

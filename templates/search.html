@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Search{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon orange">🔍</div>
+            <div>
+                <h2>Search Posts</h2>
+                <span class="vuln-tag xss">Reflected XSS</span>
+                <span class="vuln-tag sqli">SQL Injection</span>
+            </div>
+        </div>
+        
+        <form method="GET">
+            <div class="form-group">
+                <label for="q">Search Query</label>
+                <input type="text" id="q" name="q" value="{{ query }}" placeholder="Search for posts...">
+            </div>
+            <button type="submit" class="btn btn-primary">Search →</button>
+        </form>
+        
+        <div class="hint" style="margin-top: 1rem;">
+            Try: <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code> or <code>' UNION SELECT * FROM users--</code>
+        </div>
+    </div>
+    
+    {% if query %}
+    <div class="card">
+        <h3 style="margin-bottom: 1rem;">
+            {# VULNERABILITY: Reflected XSS - query rendered without escaping #}
+            Results for: {{ query | safe }}
+        </h3>
+        
+        {% if results %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Content</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for post in results %}
+                <tr>
+                    {# VULNERABILITY: XSS in results #}
+                    <td>{{ post['title'] | safe }}</td>
+                    <td>{{ post['content'] | safe }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p style="color: var(--text-secondary);">No results found.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

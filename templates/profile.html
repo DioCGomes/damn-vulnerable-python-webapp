@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 700px;">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon blue">👤</div>
+            <div>
+                <h2>User Profile</h2>
+                <span class="vuln-tag idor">IDOR</span>
+            </div>
+        </div>
+        
+        <table>
+            <tr>
+                <th style="width: 30%;">Field</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>User ID</td>
+                <td><code>{{ user['id'] }}</code></td>
+            </tr>
+            <tr>
+                <td>Username</td>
+                <td><code>{{ user['username'] }}</code></td>
+            </tr>
+            <tr>
+                <td>Email</td>
+                <td><code>{{ user['email'] }}</code></td>
+            </tr>
+            <tr>
+                <td>Role</td>
+                <td>
+                    {% if user['role'] == 'admin' %}
+                    <span class="vuln-tag sqli">{{ user['role'] }}</span>
+                    {% else %}
+                    <span class="vuln-tag idor">{{ user['role'] }}</span>
+                    {% endif %}
+                </td>
+            </tr>
+            <tr>
+                <td>Password</td>
+                {# VULNERABILITY: Exposing plaintext password #}
+                <td><code style="color: var(--accent-red);">{{ user['password'] }}</code></td>
+            </tr>
+            <tr>
+                <td>API Key</td>
+                {# VULNERABILITY: Exposing API key #}
+                <td><code style="color: var(--accent-orange);">{{ user['api_key'] or 'None' }}</code></td>
+            </tr>
+        </table>
+        
+        <div class="hint" style="margin-top: 1.5rem;">
+            Try accessing other profiles: <code>/profile/1</code>, <code>/profile/2</code>, <code>/profile/3</code>
+        </div>
+    </div>
+    
+    {% if secrets %}
+    <div class="card">
+        <h3 style="margin-bottom: 1rem; color: var(--accent-red);">🔐 User Secrets</h3>
+        {% for secret in secrets %}
+        <div class="code-block">
+            {{ secret['secret_data'] }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

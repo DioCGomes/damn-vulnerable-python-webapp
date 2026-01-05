@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon red">⚙️</div>
+            <div>
+                <h2>Admin Panel</h2>
+                <span class="vuln-tag sqli">Broken Access Control</span>
+            </div>
+        </div>
+        
+        <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+            This admin panel is accessible to ANY logged-in user. There's no role verification!
+        </p>
+        
+        <h3 style="margin-bottom: 1rem;">👥 All Users</h3>
+        
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Password</th>
+                        <th>Role</th>
+                        <th>API Key</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user['id'] }}</td>
+                        <td><code>{{ user['username'] }}</code></td>
+                        <td>{{ user['email'] }}</td>
+                        {# VULNERABILITY: Displaying plaintext passwords #}
+                        <td><code style="color: var(--accent-red);">{{ user['password'] }}</code></td>
+                        <td>
+                            {% if user['role'] == 'admin' %}
+                            <span class="vuln-tag sqli">{{ user['role'] }}</span>
+                            {% else %}
+                            <span class="vuln-tag idor">{{ user['role'] }}</span>
+                            {% endif %}
+                        </td>
+                        {# VULNERABILITY: Displaying API keys #}
+                        <td><code style="color: var(--accent-orange); font-size: 0.75rem;">{{ user['api_key'] or 'None' }}</code></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="hint" style="margin-top: 1.5rem;">
+            Login as a regular user and navigate to <code>/admin</code> - you'll still see this page!
+        </div>
+    </div>
+    
+    <div class="card">
+        <h3 style="margin-bottom: 1rem;">🔗 Dangerous Endpoints</h3>
+        <div class="grid" style="grid-template-columns: repeat(2, 1fr);">
+            <a href="{{ url_for('debug') }}" class="btn btn-danger" style="justify-content: center;">/debug - Config Dump</a>
+            <a href="{{ url_for('backup') }}" class="btn btn-danger" style="justify-content: center;">/backup - Download DB</a>
+            <a href="{{ url_for('api_user') }}" class="btn btn-danger" style="justify-content: center;">/api/user - User Data</a>
+            <a href="{{ url_for('api_fetch') }}?url=file:///etc/passwd" class="btn btn-danger" style="justify-content: center;">/api/fetch - SSRF</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

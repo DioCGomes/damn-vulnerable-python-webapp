@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 500px;">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon red">🔐</div>
+            <div>
+                <h2>Login</h2>
+                <span class="vuln-tag sqli">SQL Injection</span>
+            </div>
+        </div>
+        
+        {% if error %}
+        <div class="error-box">{{ error }}</div>
+        {% endif %}
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter username" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter password" required>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                Login →
+            </button>
+        </form>
+        
+        <div class="hint" style="margin-top: 1.5rem;">
+            Try: <code>admin' OR '1'='1' --</code> as username
+        </div>
+        
+        <p style="text-align: center; margin-top: 1.5rem; color: var(--text-secondary);">
+            Don't have an account? <a href="{{ url_for('register') }}" style="color: var(--accent-blue);">Register here</a>
+        </p>
+    </div>
+</div>
+{% endblock %}
+

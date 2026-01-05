@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1>📊 Dashboard</h1>
+        <a href="{{ url_for('new_post') }}" class="btn btn-primary">+ New Post</a>
+    </div>
+    
+    <div class="grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 2rem;">
+        <div class="card" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">👤</div>
+            <a href="{{ url_for('profile', user_id=session.get('user_id')) }}" style="color: var(--accent-blue); text-decoration: none;">
+                View My Profile
+            </a>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem;">
+                <span class="vuln-tag idor">IDOR</span>
+            </p>
+        </div>
+        
+        <div class="card" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🔧</div>
+            <a href="{{ url_for('cmd') }}" style="color: var(--accent-purple); text-decoration: none;">
+                Ping Tool
+            </a>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem;">
+                <span class="vuln-tag cmd">CMD Injection</span>
+            </p>
+        </div>
+        
+        <div class="card" style="text-align: center;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">📂</div>
+            <a href="{{ url_for('file_view') }}" style="color: var(--accent-green); text-decoration: none;">
+                File Viewer
+            </a>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 0.5rem;">
+                <span class="vuln-tag lfi">Path Traversal</span>
+            </p>
+        </div>
+    </div>
+    
+    <h2 style="margin-bottom: 1rem;">📝 Recent Posts</h2>
+    
+    {% if posts %}
+    {% for post in posts %}
+    <div class="card">
+        <h3 style="margin-bottom: 0.5rem;">
+            {# VULNERABILITY: Rendering HTML without escaping - Stored XSS #}
+            {{ post['title'] | safe }}
+        </h3>
+        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1rem;">
+            Posted on {{ post['created_at'] }}
+        </p>
+        {# VULNERABILITY: Rendering content without escaping - Stored XSS #}
+        <div>{{ post['content'] | safe }}</div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="card" style="text-align: center; color: var(--text-secondary);">
+        <p>No posts yet. Be the first to create one!</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

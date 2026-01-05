@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h1 style="font-size: 3.5rem; margin-bottom: 0.5rem;">🔓 DVPWA</h1>
+        <p style="font-size: 1.25rem; color: var(--text-secondary); margin-bottom: 2rem;">
+            Damn Vulnerable Python Web App
+        </p>
+        <p style="max-width: 600px; margin: 0 auto; line-height: 1.8;">
+            A deliberately insecure web application designed to help you learn about 
+            common web security vulnerabilities. Practice your hacking skills in a safe, 
+            legal environment.
+        </p>
+    </div>
+    
+    <h2 style="margin-bottom: 1.5rem;">🎯 Available Vulnerabilities</h2>
+    
+    <div class="grid">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon red">💉</div>
+                <div>
+                    <h3>SQL Injection</h3>
+                    <span class="vuln-tag sqli">Critical</span>
+                </div>
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Exploit the login form to bypass authentication or extract data.
+            </p>
+            <div class="hint">Try: <code>admin' OR '1'='1' --</code></div>
+            <a href="{{ url_for('login') }}" class="btn btn-secondary">Try Login →</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon orange">📜</div>
+                <div>
+                    <h3>Cross-Site Scripting (XSS)</h3>
+                    <span class="vuln-tag xss">High</span>
+                </div>
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Inject malicious scripts via search or posts.
+            </p>
+            <div class="hint">Try: <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code></div>
+            <a href="{{ url_for('search') }}" class="btn btn-secondary">Try Search →</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon purple">⌨️</div>
+                <div>
+                    <h3>Command Injection</h3>
+                    <span class="vuln-tag cmd">Critical</span>
+                </div>
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Execute arbitrary system commands through the ping tool.
+            </p>
+            <div class="hint">Try: <code>127.0.0.1; cat /etc/passwd</code></div>
+            <a href="{{ url_for('login') }}" class="btn btn-secondary">Login First →</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon blue">🔑</div>
+                <div>
+                    <h3>IDOR</h3>
+                    <span class="vuln-tag idor">High</span>
+                </div>
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Access other users' profiles by manipulating IDs.
+            </p>
+            <div class="hint">Try: <code>/profile/1</code>, <code>/profile/2</code></div>
+            <a href="{{ url_for('login') }}" class="btn btn-secondary">Login First →</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon green">📂</div>
+                <div>
+                    <h3>Path Traversal / LFI</h3>
+                    <span class="vuln-tag lfi">High</span>
+                </div>
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Read arbitrary files from the server.
+            </p>
+            <div class="hint">Try: <code>../../etc/passwd</code></div>
+            <a href="{{ url_for('login') }}" class="btn btn-secondary">Login First →</a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <div class="card-icon red">🌐</div>
+                <div>
+                    <h3>SSRF</h3>
+                    <span class="vuln-tag sqli">Critical</span>
+                </div>
+            </div>
+            <p style="color: var(--text-secondary); margin-bottom: 1rem;">
+                Make the server fetch arbitrary URLs.
+            </p>
+            <div class="hint">Try: <code>file:///etc/passwd</code></div>
+            <a href="{{ url_for('api_fetch') }}" class="btn btn-secondary">Try SSRF →</a>
+        </div>
+    </div>
+    
+    <div class="card" style="margin-top: 2rem;">
+        <h3 style="margin-bottom: 1rem;">🔐 Default Credentials</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Password</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>admin</code></td>
+                    <td><code>admin123</code></td>
+                    <td><span class="vuln-tag sqli">Admin</span></td>
+                </tr>
+                <tr>
+                    <td><code>user</code></td>
+                    <td><code>password</code></td>
+                    <td><span class="vuln-tag xss">User</span></td>
+                </tr>
+                <tr>
+                    <td><code>guest</code></td>
+                    <td><code>guest</code></td>
+                    <td><span class="vuln-tag idor">Guest</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="card" style="margin-top: 2rem;">
+        <h3 style="margin-bottom: 1rem;">🔗 API Endpoints</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Endpoint</th>
+                    <th>Vulnerability</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>/api/user</code></td>
+                    <td><span class="vuln-tag sqli">Data Exposure</span></td>
+                    <td>Leaks all user data including passwords</td>
+                </tr>
+                <tr>
+                    <td><code>/api/fetch?url=</code></td>
+                    <td><span class="vuln-tag cmd">SSRF</span></td>
+                    <td>Server-side request forgery</td>
+                </tr>
+                <tr>
+                    <td><code>/api/xml</code></td>
+                    <td><span class="vuln-tag xss">XXE</span></td>
+                    <td>XML External Entity injection</td>
+                </tr>
+                <tr>
+                    <td><code>/api/deserialize</code></td>
+                    <td><span class="vuln-tag cmd">RCE</span></td>
+                    <td>Insecure deserialization</td>
+                </tr>
+                <tr>
+                    <td><code>/debug</code></td>
+                    <td><span class="vuln-tag lfi">Info Leak</span></td>
+                    <td>Exposes configuration and secrets</td>
+                </tr>
+                <tr>
+                    <td><code>/backup</code></td>
+                    <td><span class="vuln-tag sqli">Data Exposure</span></td>
+                    <td>Downloads the entire database</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
